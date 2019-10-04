@@ -1,0 +1,54 @@
+##################### GOLD TRANSACTIONS
+
+#### CC User Loan Wallet Transactions
+
+SELECT 
+c.name as "Transaction Type",
+a.txn_type_code,
+sum(a.amount) as "Amount",
+COUNT(DISTINCT a.consumer_id) as "No. of Unique Customer",
+count(a.txn_type_code) as "No. of transactions"
+from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+INNER JOIN udio_wallet.dw_transaction_type c
+ON a.txn_type_code = c.code
+where b.mobile_number in (
+SELECT u.mobile_number
+FROM udio_wallet.b2c_user u
+JOIN udio_wallet.dw_transaction dt ON dt.consumer_id=u.consumer_id
+WHERE u.product_id=2 AND dt.merchant_id in (40006939,40006976) AND dt.txn_mode='cr'
+AND dt.transaction_status='success'
+AND dt.txn_refnum like ('%PL%')
+AND dt.transaction_date < CURDATE()
+)
+and a.transaction_status='success'
+and wt.status='success'
+AND a.txn_mode='dr'
+and a.product_id=2
+and uw.wallet_type_id = 12
+group by a.txn_type_code;
+
+
+#### GOLD Transactions details
+
+select dg.mobile_number, dg.consumer_id, dg.txn_code, dg.txn_amount, dg.action, dg.payment_mode, dg.status, dt.txn_type_code, dt.transaction_status, dt.txn_refnum, dt.amount from udio_wallet.dw_transaction dt
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = dt.txn_code and dt.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.dgd_transaction dg
+on dt.consumer_id = dg.consumer_id and dt.txn_refnum = dg.txn_code
+where dt.txn_type_code='GOLD'
+and dt.transaction_status='success'
+and uw.wallet_type_id=12
+and dt.txn_mode='dr'
+and dg.mobile_number in (
+SELECT u.mobile_number
+FROM udio_wallet.b2c_user u
+JOIN udio_wallet.dw_transaction dt ON dt.consumer_id=u.consumer_id
+WHERE u.product_id=2 AND dt.merchant_id in (40006939,40006976) AND dt.txn_mode='cr'
+AND dt.transaction_status='success'
+AND dt.txn_refnum like ('%PL%')
+AND dt.transaction_date < CURDATE()
+);

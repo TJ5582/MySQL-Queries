@@ -1,0 +1,85 @@
+#### GIFT VOUCHERS COUNT from dw_gift_transaction
+
+select count(DISTINCT gt.sender_consumer_id) from udio_wallet.dw_gift_transaction gt
+inner join udio_wallet.dw_wallet_transaction wt
+on gt.sender_consumer_id = wt.consumer_id and gt.txn_code = wt.txn_code
+join udio_wallet.b2c_user b on wt.consumer_id = b.consumer_id
+where gt.status = 'success'
+and wt.wallet_type_id = 12
+and b.product_id=2
+and gt.created_date >= "2019-07-01 00:00:00" and gt.created_date < CURDATE();
+
+##### Voucher Merchant Break up
+
+select gt.provider_transaction_id, count(DISTINCT gt.sender_consumer_id), sum(gt.amount * gt.quantity), count(gt.txn_code) from udio_wallet.dw_gift_transaction gt
+inner join udio_wallet.dw_wallet_transaction wt
+on gt.sender_consumer_id = wt.consumer_id and gt.txn_code = wt.txn_code
+join udio_wallet.b2c_user b on wt.consumer_id = b.consumer_id
+where gt.status = 'success'
+and wt.wallet_type_id = 12
+and b.product_id=2
+and gt.created_date >= "2019-07-01 00:00:00" and gt.created_date < CURDATE()
+group by 1;
+
+
+
+
+#### GIFT VOUCHERS transaction details from dw_gift_transaction
+
+select gt.sender_consumer_id, b.mobile_number, gt.status, gt.amount, gt.quantity, gt.amount * gt.quantity, gt.provider_transaction_id from udio_wallet.dw_gift_transaction gt
+inner join udio_wallet.dw_wallet_transaction wt
+on gt.sender_consumer_id = wt.consumer_id and gt.txn_code = wt.txn_code
+join udio_wallet.b2c_user b on wt.consumer_id = b.consumer_id
+where gt.status = 'success'
+and wt.wallet_type_id = 12
+and b.product_id=2
+and gt.created_date >= "2019-07-01 00:00:00" and gt.created_date < CURDATE()
+and gt.sender_consumer_id in (
+SELECT
+b.consumer_id from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-07-01 00:00:00" and a.transaction_date < CURDATE()
+);
+
+
+####################################################
+
+
+#### GIFT VOUCHERS transaction details from dw_transaction
+
+select *, b.mobile_number from udio_wallet.dw_transaction dt
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = dt.txn_code and dt.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+join udio_wallet.b2c_user b on dt.consumer_id = b.consumer_id
+where dt.txn_type_code = 'OG'
+and dt.transaction_status = 'success'
+and dt.txn_mode = 'dr'
+and uw.wallet_type_id=12
+and b.product_id=2
+and dt.transaction_date >= "2019-07-01 00:00:00" and dt.transaction_date < CURDATE()
+and dt.consumer_id in (
+SELECT
+b.consumer_id from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-07-01 00:00:00" and a.transaction_date < CURDATE()
+);

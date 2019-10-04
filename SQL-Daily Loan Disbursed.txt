@@ -1,0 +1,178 @@
+############### TOTAL LOAN DISBURSED (TOP-UP + CHOTA CREDIT)
+
+SELECT COUNT(u.mobile_number), SUM(dt.amount)
+FROM udio_wallet.b2c_user u
+JOIN udio_wallet.dw_transaction dt ON dt.consumer_id=u.consumer_id
+WHERE u.product_id=2 AND dt.merchant_id in (40006939,40006976) AND dt.txn_mode='cr'
+AND dt.transaction_status='success'
+AND (dt.txn_refnum like ('%PL%') or dt.txn_refnum like ('%TP%'))
+AND dt.transaction_date < CURDATE();
+
+################# Top-Up Loan - Total
+
+SELECT
+count(b.mobile_number), sum(a.amount) from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE();
+
+
+################# Top-Up Loan - Monthly
+
+SELECT
+count(b.mobile_number), sum(a.amount) from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and uw.wallet_type_id = 12
+and a.amount >=1000
+and a.merchant_id = 40006939
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-07-01 00:00:00" and a.transaction_date < CURDATE();
+
+
+################# Top-Up Loan - yesterday
+
+SELECT
+count(b.mobile_number), sum(a.amount) from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and uw.wallet_type_id = 12
+and a.amount >=1000
+and a.merchant_id = 40006939
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY) AND DATE_SUB(CURRENT_DATE, INTERVAL 1 SECOND);
+
+################# Top-Up Loan - TODAY
+
+SELECT
+count(b.mobile_number), sum(a.amount) from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and uw.wallet_type_id = 12
+and a.amount >=1000
+and a.merchant_id = 40006939
+AND a.txn_refnum like ('%TP%')
+and date(a.transaction_date) = CURDATE();
+
+
+
+################# CC - total
+
+SELECT COUNT(u.mobile_number), SUM(dt.amount)
+FROM udio_wallet.b2c_user u
+JOIN udio_wallet.dw_transaction dt ON dt.consumer_id=u.consumer_id
+WHERE u.product_id=2 AND dt.merchant_id in (40006939,40006976) AND dt.txn_mode='cr'
+AND dt.transaction_status='success'
+AND dt.txn_refnum like ('%PL%')
+AND dt.transaction_date < CURDATE();
+
+################# CC - Monthly
+
+SELECT COUNT(u.mobile_number), SUM(dt.amount)
+FROM udio_wallet.b2c_user u
+JOIN udio_wallet.dw_transaction dt ON dt.consumer_id=u.consumer_id
+WHERE u.product_id=2 AND dt.merchant_id in (40006939,40006976) AND dt.txn_mode='cr'
+AND dt.transaction_status='success'
+AND dt.txn_refnum like ('%PL%')
+AND dt.transaction_date between '2019-07-01 00:00:00' and CURDATE()
+
+
+################# CC - Yesterday
+
+SELECT
+count(b.mobile_number), sum(a.amount) from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and uw.wallet_type_id = 12
+and a.merchant_id in (40006939, 40006976)
+AND a.txn_refnum like ('%PL%')
+and a.transaction_date BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY) AND DATE_SUB(CURRENT_DATE, INTERVAL 1 SECOND)
+
+
+################# CC - Today
+
+SELECT
+count(b.mobile_number), sum(a.amount) from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and uw.wallet_type_id = 12
+and a.merchant_id in (40006939, 40006976)
+AND a.txn_refnum like ('%PL%')
+and date(a.transaction_date) = CURDATE();
+
+
+
+
+
+
+
+################# CC - total
+
+SELECT COUNT(u.mobile_number), SUM(dt.amount)
+FROM udio_wallet.b2c_user u
+JOIN udio_wallet.dw_transaction dt ON dt.consumer_id=u.consumer_id
+WHERE u.product_id=2 AND dt.merchant_id in (40006939,40006976) AND dt.txn_mode='cr'
+AND dt.transaction_status='success'
+AND dt.txn_refnum like ('%PL%')
+AND dt.transaction_date < CURDATE();
+
+
+##### CC in wallet type 12 only
+
+SELECT COUNT(u.mobile_number) as "Total Users", SUM(dt.amount) as "Total Amount"
+FROM udio_wallet.b2c_user u
+JOIN udio_wallet.dw_transaction dt ON dt.consumer_id=u.consumer_id
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = dt.txn_code and dt.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+WHERE u.product_id=2 AND dt.merchant_id in (40006939,40006976) AND dt.txn_mode='cr'
+AND dt.transaction_status='success'
+AND dt.txn_refnum like ('%PL%')
+AND uw.wallet_type_id = 12
+AND dt.transaction_date < CURDATE();
+
+##### new CC in wallet type 12 only
+
+SELECT COUNT(u.mobile_number) as "Total Users", SUM(dt.amount) as "Total Amount"
+FROM udio_wallet.b2c_user u
+JOIN udio_wallet.dw_transaction dt ON dt.consumer_id=u.consumer_id
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = dt.txn_code and dt.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+WHERE u.product_id=2 AND dt.merchant_id in (40006976) AND dt.txn_mode='cr'
+AND dt.transaction_status='success'
+AND dt.txn_refnum like ('%PL%')
+AND uw.wallet_type_id = 12
+AND dt.transaction_date < CURDATE();

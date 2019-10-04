@@ -1,0 +1,234 @@
+#Total Loan customers executed
+
+SELECT
+count(b.mobile_number) as 'Total Users', sum(a.amount) as 'Total Amount' from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE();
+
+#### User Loan Wallet Transactions
+
+SELECT 
+c.name as "Transaction Type",
+a.txn_type_code,
+sum(a.amount) as "Amount",
+COUNT(DISTINCT a.consumer_id) as "No. of Unique Customer",
+count(a.txn_type_code) as "No. of transactions"
+from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+INNER JOIN udio_wallet.dw_transaction_type c
+ON a.txn_type_code = c.code
+where b.mobile_number in (
+SELECT
+b.mobile_number from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE()
+)
+and a.transaction_status='success'
+and wt.status='success'
+AND a.txn_mode='dr'
+and a.product_id=2
+and uw.wallet_type_id = 12
+group by a.txn_type_code;
+
+
+#### User Loan Wallet Balance
+
+select count(a.consumer_id) as "Count",
+sum(a.balance) as "Wal_Balance"
+from udio_wallet.dw_user_wallet a
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+where b.mobile_number in (
+SELECT
+b.mobile_number from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE()
+)
+and a.wallet_type_id='12'
+and a.product_id='2'
+and a.status='active';
+
+
+#### User Card Transaction
+
+SELECT 
+a.narration as "Merchant Name",
+sum(a.transaction_amount) as "Amount",
+count(a.txn_code) as "No. of Transactions",
+a.txn_type as "Transaction Type",
+count(DISTINCT a.consumer_id) "Distinct Users"
+from udio_wallet.dw_card_transaction a
+INNER JOIN udio_wallet.dw_transaction b on a.txn_code = b.txn_code and a.consumer_id=b.consumer_id
+INNER JOIN udio_wallet.dw_wallet_transaction wt on b.txn_code = wt.txn_code and b.consumer_id=wt.consumer_id
+INNER JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user c on a.consumer_id=c.consumer_id
+where b.txn_type_code='CT'
+AND a.status='success'
+AND b.transaction_status='success'
+AND b.txn_mode='dr'
+AND b.product_id='2'
+AND c.mobile_number in (
+SELECT
+b.mobile_number from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE()
+)
+and uw.wallet_type_id = 12
+group by 1
+order by 2 DESC;
+
+
+#### Card Transaction amount to find unique on/offline customers
+
+SELECT 
+a.txn_type  "Transaction Type",
+count(DISTINCT a.consumer_id) AS "Distinct Users",
+SUM(a.transaction_amount) as "Amount"
+from udio_wallet.dw_card_transaction a
+INNER JOIN udio_wallet.dw_transaction b on a.txn_code = b.txn_code and a.consumer_id=b.consumer_id
+INNER JOIN udio_wallet.dw_wallet_transaction wt on b.txn_code = wt.txn_code and b.consumer_id=wt.consumer_id
+INNER JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user c on a.consumer_id=c.consumer_id
+where b.txn_type_code='CT'
+AND a.status='success'
+AND b.transaction_status='success'
+AND b.txn_mode='dr'
+AND b.product_id='2'
+AND c.mobile_number in (
+SELECT
+b.mobile_number from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE()
+)
+and uw.wallet_type_id = 12
+GROUP by a.txn_type;		
+
+
+#### Recharge Transaction Description
+
+SELECT a.operator_type as "Operator Type",
+a.recharge_type as "Recharge Type",
+a.operator as "Operator",
+a.transaction_status as "Transaction Status",
+sum(a.amount) as "Amount",
+count(a.txn_code) as "No. of Transactions"
+from udio_wallet.dw_recharge_transaction a
+INNER JOIN udio_wallet.dw_transaction b
+ON a.consumer_id=b.consumer_id and a.txn_code = b.txn_code
+JOIN udio_wallet.dw_wallet_transaction wt
+on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw
+on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user c
+ON a.consumer_id = c.consumer_id
+where c.mobile_number in (
+SELECT
+b.mobile_number from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE()
+)
+and a.transaction_status='success'
+and b.transaction_status='success'
+and b.product_id=2
+and uw.wallet_type_id = 12
+group by a.operator;
+
+
+#### Bill Payment Transaction Description
+
+SELECT a.provider as 'Provider',
+a.provider_type  as 'Provider Type',
+sum(a.amount) as 'Amount',
+count(a.txn_code) as 'No. of Transactions'
+from udio_wallet.dw_bill_payment_transaction a
+INNER JOIN udio_wallet.dw_transaction b
+ON a.consumer_id=b.consumer_id and a.txn_code = b.txn_code
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user c
+ON a.consumer_id = c.consumer_id
+where c.mobile_number in (
+SELECT
+b.mobile_number from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE()
+)
+and b.transaction_status='success'
+and a.transaction_status='success'
+and b.product_id=2
+and uw.wallet_type_id = 12
+group by 1;
+

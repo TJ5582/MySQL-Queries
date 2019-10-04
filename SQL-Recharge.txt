@@ -1,0 +1,154 @@
+#### Recharge Details with unique customers
+SELECT a.operator_type as "Operator Type",
+a.recharge_type as "Recharge Type",
+a.operator as "Operator",
+a.transaction_status as "Transaction Status",
+sum(a.amount) as "Amount",
+count(a.txn_code) as "No. of Transactions",
+count(DISTINCT a.mobile_number) AS "No. of Users"
+from udio_wallet.dw_recharge_transaction a
+INNER JOIN udio_wallet.dw_transaction b
+ON a.consumer_id=b.consumer_id and a.txn_code = b.txn_code
+JOIN udio_wallet.dw_wallet_transaction wt
+on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw
+on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user c
+ON a.consumer_id = c.consumer_id
+where c.mobile_number in (
+SELECT
+b.mobile_number from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE()
+)
+and a.transaction_status='success'
+and b.transaction_status='success'
+and b.product_id=2
+and uw.wallet_type_id = 12
+group by a.operator;
+
+
+
+#### NO. OF RECHARGE DONE BY USERS
+SELECT
+DISTINCT a.mobile_number AS "No. of Users",
+count(a.txn_code) as "No. of Transactions"
+from udio_wallet.dw_recharge_transaction a
+INNER JOIN udio_wallet.dw_transaction b
+ON a.consumer_id=b.consumer_id and a.txn_code = b.txn_code
+JOIN udio_wallet.dw_wallet_transaction wt
+on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw
+on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user c
+ON a.consumer_id = c.consumer_id
+where c.mobile_number in (
+SELECT
+b.mobile_number from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE()
+)
+and a.transaction_status='success'
+and b.transaction_status='success'
+and b.product_id=2
+and uw.wallet_type_id = 12
+and a.operator_type ='MOBILE'
+group by a.mobile_number;
+
+
+
+############ Pivot Table = NO. OF MOBILE RECHARGES PER USER
+select x.Transactions, count(distinct x.Users) from (
+SELECT
+DISTINCT a.mobile_number AS "Users",
+count(a.txn_code) as "Transactions"
+from udio_wallet.dw_recharge_transaction a
+INNER JOIN udio_wallet.dw_transaction b
+ON a.consumer_id=b.consumer_id and a.txn_code = b.txn_code
+JOIN udio_wallet.dw_wallet_transaction wt
+on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw
+on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user c
+ON a.consumer_id = c.consumer_id
+where c.mobile_number in (
+SELECT
+b.mobile_number from udio_wallet.dw_transaction a
+JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id
+JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+INNER JOIN udio_wallet.b2c_user b
+ON a.consumer_id = b.consumer_id
+and a.transaction_status='success'
+and a.txn_type_code = 'mcd'
+and a.txn_mode = 'cr'
+and a.merchant_id = 40006939
+and uw.wallet_type_id = 12
+and a.amount >=1000
+AND a.txn_refnum like ('%TP%')
+and a.transaction_date >= "2019-05-01 00:00:00" and a.transaction_date < CURDATE()
+)
+and a.transaction_status='success'
+and b.transaction_status='success'
+and b.product_id=2
+and uw.wallet_type_id = 12
+and a.operator_type ='MOBILE'
+group by a.mobile_number
+) x group by 1;
+
+
+############# ALL Recharges
+select a.mobile_number AS 'Recharge Number', a.recharge_type, a.operator_type, a.operator, a.amount, a.transaction_status, a.consumer_id, b.mobile_number, a.recharge_for
+from udio_wallet.dw_recharge_transaction a
+inner join udio_wallet.b2c_user b
+on a.consumer_id = b.consumer_id
+where a.operator_type = 'MOBILE'
+AND a.transaction_status='success'
+and b.product_id=2
+and b.status='active'
+and a.transaction_date >= '2019-07-22' and a.transaction_date < CURDATE();
+
+
+############# Recharge TO OTHER number
+select a.mobile_number AS 'Recharge Number', a.recharge_type, a.operator_type, a.operator, a.amount, a.transaction_status, a.consumer_id, b.mobile_number, a.recharge_for
+from udio_wallet.dw_recharge_transaction a
+inner join udio_wallet.b2c_user b
+on a.consumer_id = b.consumer_id
+where operator_type = 'MOBILE'
+AND a.transaction_status='success'
+and b.product_id=2
+and b.status='active'
+AND a.mobile_number <> b.mobile_number
+and a.transaction_date >= '2019-07-22' and a.transaction_date < CURDATE();
+
+
+############# Recharge TO SAME number
+select a.mobile_number AS 'Recharge Number', a.recharge_type, a.operator_type, a.operator, a.amount, a.transaction_status, a.consumer_id, b.mobile_number, a.recharge_for
+from udio_wallet.dw_recharge_transaction a
+inner join udio_wallet.b2c_user b
+on a.consumer_id = b.consumer_id
+where operator_type = 'MOBILE'
+AND transaction_status='success'
+and b.product_id=2
+and b.status='active'
+AND a.mobile_number = b.mobile_number
+and a.transaction_date >= '2019-07-22' and a.transaction_date < CURDATE();
