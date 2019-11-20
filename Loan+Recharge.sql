@@ -39,6 +39,7 @@ JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.cons
 JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
 INNER JOIN udio_wallet.b2c_user b
 ON a.consumer_id = b.consumer_id
+WHERE a.mobile_number in ("","") 
 and a.transaction_status='success'
 and a.txn_type_code = 'mcd'
 and a.txn_mode = 'cr'
@@ -99,6 +100,7 @@ SELECT
         JOIN udio_wallet.b2c_user b ON a.consumer_id=b.consumer_id
         JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.consumer_id=wt.consumer_id and a.transaction_status=wt.status
         JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
+        WHERE a.mobile_number in ("","") 
         and a.transaction_status='success'
         AND a.merchant_id in (40006939,40006976)
         and a.txn_mode = 'cr'
@@ -116,6 +118,7 @@ JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.cons
 JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
 INNER JOIN udio_wallet.b2c_user b
 ON a.consumer_id = b.consumer_id
+WHERE a.mobile_number in ("","") 
 and a.transaction_status='success'
 and a.txn_type_code = 'mcd'
 and a.txn_mode = 'cr'
@@ -131,6 +134,7 @@ JOIN udio_wallet.dw_wallet_transaction wt on wt.txn_code = a.txn_code and a.cons
 JOIN udio_wallet.dw_user_wallet uw on uw.id = wt.user_wallet_id
 INNER JOIN udio_wallet.b2c_user b
 ON a.consumer_id = b.consumer_id
+WHERE a.mobile_number in ("","") 
 and a.transaction_status='success'
 and a.txn_type_code = 'mcd'
 and a.txn_mode = 'cr'
@@ -153,9 +157,7 @@ inner join udio_wallet.dw_ppi_bank_user b
 on a.mobile_number = b.mobile_number
 where a.product_id=2 and a.status='active';
 
-select * from udio_wallet.b2c_user where mobile_number='9833081872';
-
-mobile_number='9664594765';
+select * from udio_wallet.b2c_user where mobile_number='';
 
 
 select a.mobile_number, a.kyc_level, b.status, b.product_id from udio_wallet.dw_ppi_bank_user a
