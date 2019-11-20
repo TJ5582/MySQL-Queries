@@ -20,7 +20,8 @@ count(action) as 'Login',
 count(DISTINCT consumer_id) as 'No. of Accounts',
 
 select * from udio_wallet.b2c_user where consumer_id='8456847861213370264';
-round(count(DISTINCT consumer_id)/count(DISTINCT uid),2)
+
+select round(count(DISTINCT consumer_id)/count(DISTINCT uid),2)
 from udio_wallet.dw_user_device_detail
 where action='login'
 and merchant_id=1111
